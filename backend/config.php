@@ -1,7 +1,7 @@
 <?php
 // Database configuration
 $host = 'localhost';
-$db = 'aml_db';
+$db = 'aml_database';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
