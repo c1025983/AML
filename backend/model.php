@@ -2,56 +2,47 @@
 require_once "config.php";
 
 // Fetch total members
-function getTotalMembers($pdo)
-{
-    $stmt = $pdo->query("SELECT COUNT(*) FROM LibraryMember");
-    $result = $stmt->fetchColumn();
-    return $result;
+function getTotalMembers($pdo) {
+    $stmt = $pdo->query("SELECT COUNT(*) FROM librarymember");
+    return $stmt->fetchColumn();
 }
 
 // Fetch new members this week
 function getNewMembersThisWeek($pdo)
 {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM LibraryMember WHERE registration_date > CURDATE() - INTERVAL 7 DAY");
+    $stmt = $pdo->query("SELECT COUNT(*) FROM LibraryMember WHERE registration_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)");
     $result = $stmt->fetchColumn();
     return $result;
 }
 
-// Fetch books borrowed
-function getBooksBorrowed($pdo)
-{
-    $stmt = $pdo->query("SELECT COUNT(*) FROM BorrowedBooks WHERE returned = 0");
-    $result = $stmt->fetchColumn();
-    return $result;
+// Fetch books currently borrowed
+function getBooksBorrowed($pdo) {
+    $stmt = $pdo->query("SELECT COUNT(*) FROM borrowrecord WHERE status = 'borrowed'");
+    return $stmt->fetchColumn();
 }
 
-// Fetch books due (where the return date is today or in the past)
-function getBooksDue($pdo)
-{
-    $stmt = $pdo->query("SELECT COUNT(*) FROM BorrowedBooks WHERE due_date <= CURDATE() AND returned = 0");
-    $result = $stmt->fetchColumn();
-    return $result;
+// Fetch books due (where the return_due date is today or in the past)
+function getBooksDue($pdo) {
+    $stmt = $pdo->query("SELECT COUNT(*) FROM borrowrecord WHERE return_due <= CURDATE() AND status = 'borrowed'");
+    return $stmt->fetchColumn();
 }
 
 // Fetch all items from the catalogue
-function getCatalogueItems($pdo)
-{
+function getCatalogueItems($pdo) {
     $stmt = $pdo->query("SELECT * FROM MediaItem");
     return $stmt->fetchAll();
 }
 
 // Register a new user
-function registerUser($pdo, $username, $email, $password)
-{
+function registerUser($pdo, $username, $email, $password) {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO LibraryMember (username, email, password) VALUES (?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO librarymember (name, email, password) VALUES (?, ?, ?)");
     $stmt->execute([$username, $email, $hashedPassword]);
 }
 
 // Authenticate a user
-function loginUser($pdo, $email, $password)
-{
-    $stmt = $pdo->prepare("SELECT * FROM LibraryMember WHERE email = ?");
+function loginUser($pdo, $email, $password) {
+    $stmt = $pdo->prepare("SELECT * FROM librarymember WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
