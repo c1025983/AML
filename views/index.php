@@ -30,7 +30,7 @@
             echo "<p>Login page.</p>";
             break;
         case 'librarian':
-            include('librarian/index.php');
+            include('librarian.php'); // Updated to the correct path
             break;
         default:
             echo "<p>Welcome to the Advanced Media Library!</p>";
