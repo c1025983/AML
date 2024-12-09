@@ -28,4 +28,13 @@ function loginUser($pdo, $email, $password)
     }
     return false; // Login failed
 }
+
+function getAllLibraryMembers($pdo) {
+    // Query to get all members from the librarymember table
+    $stmt = $pdo->query("SELECT * FROM librarymember");
+    
+    // Return the fetched results as an associative array
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 ?>
