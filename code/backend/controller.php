@@ -29,4 +29,7 @@ if ($action === 'catalogue') {
 } else {
     require "../views/index.php"; // Default to homepage
 }
+
+$members = getAllLibraryMembers($pdo)
+require_once 'views/librarian/index.php';
 ?>

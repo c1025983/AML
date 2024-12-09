@@ -12,6 +12,7 @@
         <a href="index.php?action=catalogue">View Catalogue</a> |
         <a href="index.php?action=join">Join Us</a> |
         <a href="index.php?action=login">Login</a>
+        <a href="librarian/index.php">Librarian</a>
     </nav>
 </body>
 </html>
