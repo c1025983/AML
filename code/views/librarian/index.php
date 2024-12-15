@@ -1,5 +1,30 @@
+<!DOCTYPE html>
+<html>
 <?php
 include_once('../../backend/config.php');
+
+// Fetch the total number of members
+$sql_count = "SELECT COUNT(*) AS total_members FROM librarymember";
+$result_count = $pdo->query($sql_count);
+$total_members = $result_count ? $result_count->fetch(PDO::FETCH_ASSOC)['total_members'] : 0;
+
+// Fetch all members
+$sql = "SELECT * FROM librarymember";
+$members = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+// Fetch the total number of books borrowed
+$sql_borrowed = "SELECT COUNT(*) AS total_borrowed FROM borrowrecord";
+$result_borrowed = $pdo->query($sql_borrowed);
+$total_borrowed = $result_borrowed ? $result_borrowed->fetch(PDO::FETCH_ASSOC)['total_borrowed'] : 0;
+
+// Fetch members who joined in the last week
+$sql_last_week = "SELECT COUNT(*) AS members_last_week FROM librarymember WHERE registration_date >= NOW() - INTERVAL 7 DAY";
+$result_last_week = $pdo->query($sql_last_week);
+$members_last_week = $result_last_week ? $result_last_week->fetch(PDO::FETCH_ASSOC)['members_last_week'] : 0;
+
+// Fetch media items
+$sql_media_items = "SELECT * FROM mediaitem";
+$media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
 // Handle media deletion
 if (isset($_POST['delete_media'])) {
@@ -9,7 +34,6 @@ if (isset($_POST['delete_media'])) {
     $stmt->bindParam(':media_id', $media_id, PDO::PARAM_INT);
     $stmt->execute();
 
-    // Force page refresh after deletion
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
@@ -29,7 +53,6 @@ if (isset($_POST['create_media'])) {
     $stmt->bindParam(':branch_id', $branch_id, PDO::PARAM_INT);
     $stmt->execute();
 
-    // Force page refresh after creation
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
@@ -51,33 +74,10 @@ if (isset($_POST['edit_media'])) {
     $stmt->bindParam(':media_id', $media_id, PDO::PARAM_INT);
     $stmt->execute();
 
-    // Force page refresh after update
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
-
-// Fetch data for display
-$sql_count = "SELECT COUNT(*) AS total_members FROM librarymember";
-$result_count = $pdo->query($sql_count);
-$total_members = $result_count ? $result_count->fetch(PDO::FETCH_ASSOC)['total_members'] : 0;
-
-$sql = "SELECT * FROM librarymember";
-$members = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-$sql_borrowed = "SELECT COUNT(*) AS total_borrowed FROM borrowrecord";
-$result_borrowed = $pdo->query($sql_borrowed);
-$total_borrowed = $result_borrowed ? $result_borrowed->fetch(PDO::FETCH_ASSOC)['total_borrowed'] : 0;
-
-$sql_last_week = "SELECT COUNT(*) AS members_last_week FROM librarymember WHERE registration_date >= NOW() - INTERVAL 7 DAY";
-$result_last_week = $pdo->query($sql_last_week);
-$members_last_week = $result_last_week ? $result_last_week->fetch(PDO::FETCH_ASSOC)['members_last_week'] : 0;
-
-$sql_media_items = "SELECT * FROM mediaitem";
-$media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
 ?>
-
-<!DOCTYPE html>
-<html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -88,13 +88,14 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
     <link rel="stylesheet" href="style.css">
     <style>
         .table-container {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-            padding: 10px;
+            max-height: 300px; /* Set a max height for the scrollable area */
+            overflow-y: auto; /* Enable vertical scrolling */
+            border: 1px solid #ddd; /* Optional: add a border around the container */
+            border-radius: 5px; /* Optional: rounded corners */
+            background-color: #f9f9f9; /* Optional: light background for the container */
+            padding: 10px; /* Add some padding */
         }
+
         .card {
             background-color: #fff;
             border-radius: 10px;
@@ -116,6 +117,18 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-agenda"></i>
+                        <span>Task</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#media" aria-expanded="false" aria-controls="media">
                         <i class="lni lni-library"></i>
@@ -133,11 +146,33 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
                         </li>
                     </ul>
                 </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-popup"></i>
+                        <span>Notification</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-cog"></i>
+                        <span>Setting</span>
+                    </a>
+                </li>
             </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link">
+                    <i class="lni lni-exit"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
         </aside>
         <div class="main">
+            <nav class="navbar navbar-expand px-4 py-3">
+                <!-- Navbar content here -->
+            </nav>
             <main class="content px-3 py-4">
                 <div class="container-fluid">
+                    <h3 class="fw-bold fs-4 mb-3">Librarian Dashboard</h3>
                     <div class="row mb-4">
                         <div class="col-md-4">
                             <div class="card">
@@ -158,7 +193,6 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
                             </div>
                         </div>
                     </div>
-
                     <h3 class="fw-bold fs-4 mb-3">Library Members</h3>
                     <div class="table-container">
                         <table class="table table-striped">
@@ -171,21 +205,25 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($members as $member): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($member['member_id']); ?></td>
-                                        <td><?php echo htmlspecialchars($member['name']); ?></td>
-                                        <td><?php echo htmlspecialchars($member['email']); ?></td>
-                                        <td><?php echo htmlspecialchars($member['address']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
+                                <?php if (!empty($members)) : ?>
+                                    <?php foreach ($members as $member) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($member['member_id']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['address']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr><td colspan="4">No members found</td></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
 
                     <h3 class="fw-bold fs-4 mb-3">Media Items</h3>
                     <div class="table-container">
-                        <table class="table table-striped" id="media-table">
+                        <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -196,15 +234,19 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($media_items as $media): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($media['media_id']); ?></td>
-                                        <td><?php echo htmlspecialchars($media['title']); ?></td>
-                                        <td><?php echo htmlspecialchars($media['author']); ?></td>
-                                        <td><?php echo htmlspecialchars($media['genre']); ?></td>
-                                        <td><?php echo htmlspecialchars($media['branch_id']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
+                                <?php if (!empty($media_items)) : ?>
+                                    <?php foreach ($media_items as $media) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($media['media_id']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['author']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['genre']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['branch_id']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr><td colspan="5">No media items found</td></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -246,16 +288,16 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
                     </div>
                     <div class="modal-body">
                         <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required>
+                        
                         <label for="author" class="form-label mt-3">Author</label>
-                        <input type="text" class="form-control" id="author" name="author" required>
-
+                        <input type="text" class="form-control" id="author" name="author" placeholder="Enter Author" required>
+                        
                         <label for="genre" class="form-label mt-3">Genre</label>
-                        <input type="text" class="form-control" id="genre" name="genre" required>
-
+                        <input type="text" class="form-control" id="genre" name="genre" placeholder="Enter Genre" required>
+                        
                         <label for="branch_id" class="form-label mt-3">Branch ID</label>
-                        <input type="number" class="form-control" id="branch_id" name="branch_id" required>
+                        <input type="number" class="form-control" id="branch_id" name="branch_id" placeholder="Enter Branch ID" value="1" required>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" name="create_media" class="btn btn-primary">Create</button>
@@ -277,19 +319,19 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
                     </div>
                     <div class="modal-body">
                         <label for="media_id" class="form-label">Media ID</label>
-                        <input type="number" class="form-control" id="media_id" name="media_id" required>
+                        <input type="number" class="form-control" id="media_id" name="media_id" placeholder="Enter Media ID to Edit" required>
 
                         <label for="edit_title" class="form-label mt-3">Title</label>
-                        <input type="text" class="form-control" id="edit_title" name="edit_title" required>
+                        <input type="text" class="form-control" id="edit_title" name="edit_title" placeholder="Enter New Title" required>
 
                         <label for="edit_author" class="form-label mt-3">Author</label>
-                        <input type="text" class="form-control" id="edit_author" name="edit_author" required>
+                        <input type="text" class="form-control" id="edit_author" name="edit_author" placeholder="Enter New Author" required>
 
                         <label for="edit_genre" class="form-label mt-3">Genre</label>
-                        <input type="text" class="form-control" id="edit_genre" name="edit_genre" required>
+                        <input type="text" class="form-control" id="edit_genre" name="edit_genre" placeholder="Enter New Genre" required>
 
                         <label for="edit_branch_id" class="form-label mt-3">Branch ID</label>
-                        <input type="number" class="form-control" id="edit_branch_id" name="edit_branch_id" required>
+                        <input type="number" class="form-control" id="edit_branch_id" name="edit_branch_id" placeholder="Enter New Branch ID" required>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" name="edit_media" class="btn btn-primary">Save Changes</button>
@@ -301,5 +343,6 @@ $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
 </body>
 </html>
