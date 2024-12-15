@@ -1,73 +1,72 @@
 <!DOCTYPE html>
 <html>
 <?php
-include_once('../../backend/config.php'); // Including the config file for the database connection
+include_once('../../backend/config.php');
 
-// SQL query to fetch the total number of members
+// Fetch the total number of members
 $sql_count = "SELECT COUNT(*) AS total_members FROM librarymember";
 $result_count = $pdo->query($sql_count);
+$total_members = $result_count ? $result_count->fetch(PDO::FETCH_ASSOC)['total_members'] : 0;
 
-// Check if there are any results for total members
-$total_members = 0;
-if ($result_count) {
-    $row_count = $result_count->fetch(PDO::FETCH_ASSOC);
-    $total_members = $row_count['total_members'];
-}
-// SQL query to fetch all members
+// Fetch all members
 $sql = "SELECT * FROM librarymember";
-$result = $pdo->query($sql);
+$members = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-// Check if there are any results
-$members = [];
-if ($result) {
-    $members = $result->fetchAll(PDO::FETCH_ASSOC);
-}
-
-// SQL query to fetch the total number of books borrowed
+// Fetch the total number of books borrowed
 $sql_borrowed = "SELECT COUNT(*) AS total_borrowed FROM borrowrecord";
 $result_borrowed = $pdo->query($sql_borrowed);
+$total_borrowed = $result_borrowed ? $result_borrowed->fetch(PDO::FETCH_ASSOC)['total_borrowed'] : 0;
 
-// Check if there are any results for total books borrowed
-$total_borrowed = 0;
-if ($result_borrowed) {
-    $row_borrowed = $result_borrowed->fetch(PDO::FETCH_ASSOC);
-    $total_borrowed = $row_borrowed['total_borrowed'];
-}
-
+// Fetch members who joined in the last week
 $sql_last_week = "SELECT COUNT(*) AS members_last_week FROM librarymember WHERE registration_date >= NOW() - INTERVAL 7 DAY";
 $result_last_week = $pdo->query($sql_last_week);
+$members_last_week = $result_last_week ? $result_last_week->fetch(PDO::FETCH_ASSOC)['members_last_week'] : 0;
 
-// Check if there are any results for members who joined in the last week
-$members_last_week = 0;
-if ($result_last_week) {
-    $row_last_week = $result_last_week->fetch(PDO::FETCH_ASSOC);
-    $members_last_week = $row_last_week['members_last_week'];
+// Fetch media items
+$sql_media_items = "SELECT * FROM mediaitem";
+$media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+// Handle media deletion
+if (isset($_POST['delete_media'])) {
+    $media_id = $_POST['media_id'];
+
+    $sql_delete = "DELETE FROM mediaitem WHERE media_id = :media_id";
+    $stmt = $pdo->prepare($sql_delete);
+    $stmt->bindParam(':media_id', $media_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Refresh the media items list
+    $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
 
+// Handle media creation
+if (isset($_POST['create_media'])) {
+    $title = $_POST['title'];
+    $author = $_POST['author'];
+    $genre = $_POST['genre'];
+    $branch_id = $_POST['branch_id'];
 
-$sql_media_items = "SELECT * FROM mediaitem";
-$result_media_items = $pdo->query($sql_media_items);
+    $sql_insert = "INSERT INTO mediaitem (title, author, genre, branch_id) VALUES (:title, :author, :genre, :branch_id)";
+    $stmt = $pdo->prepare($sql_insert);
+    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+    $stmt->bindParam(':author', $author, PDO::PARAM_STR);
+    $stmt->bindParam(':genre', $genre, PDO::PARAM_STR);
+    $stmt->bindParam(':branch_id', $branch_id, PDO::PARAM_INT);
+    $stmt->execute();
 
-// Check if there are any results for media items
-$media_items = [];
-if ($result_media_items) {
-    while ($row = $result_media_items->fetch(PDO::FETCH_ASSOC)) {
-        $media_items[] = $row;
-    }
+    // Refresh the media items list
+    $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
 ?>
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Librarian Page</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <div class="wrapper">
         <aside id="sidebar">
@@ -94,39 +93,16 @@ if ($result_media_items) {
                 </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#auth" aria-expanded="false" aria-controls="auth">
-                        <i class="lni lni-protection"></i>
-                        <span>Auth</span>
+                        data-bs-target="#media" aria-expanded="false" aria-controls="media">
+                        <i class="lni lni-library"></i>
+                        <span>Media</span>
                     </a>
-                    <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                    <ul id="media" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Login</a>
+                            <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#deleteMediaModal">Delete Media</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Register</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#multi" aria-expanded="false" aria-controls="multi">
-                        <i class="lni lni-layout"></i>
-                        <span>Multi Level</span>
-                    </a>
-                    <ul id="multi" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#multi-two" aria-expanded="false" aria-controls="multi-two">
-                                Two Links
-                            </a>
-                            <ul id="multi-two" class="sidebar-dropdown list-unstyled collapse">
-                                <li class="sidebar-item">
-                                    <a href="#" class="sidebar-link">Link 1</a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="#" class="sidebar-link">Link 2</a>
-                                </li>
-                            </ul>
+                            <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#createMediaModal">Create Media</a>
                         </li>
                     </ul>
                 </li>
@@ -152,167 +128,154 @@ if ($result_media_items) {
         </aside>
         <div class="main">
             <nav class="navbar navbar-expand px-4 py-3">
-                <form action="#" class="d-none d-sm-inline-block">
-
-                </form>
-                <div class="navbar-collapse collapse">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item dropdown">
-                            <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
-                                <img src="/account.png" class="avatar img-fluid" alt="">
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end rounded">
-
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                <!-- Navbar content here -->
             </nav>
             <main class="content px-3 py-4">
                 <div class="container-fluid">
-                    <div class="mb-3">
-                        <h3 class="fw-bold fs-4 mb-3">Librarian Dashboard</h3>
-                        <div class="row">
-                            <div class="col-12 col-md-4">
-                                <div class="card border-0">
-                                    <div class="card-body py-4">
-                                        <h5 class="mb-2 fw-bold">
-                                            Total Members
-                                        </h5>
-                                        <p class="mb-2 fw-bold">
-                                            <?php echo $total_members; ?>
-                                        </p>
-                                        <div class="mb-0">
-                                            <span class="fw-bold">
-                                                Total members in the system
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="card border-0">
-                                    <div class="card-body py-4">
-                                        <h5 class="mb-2 fw-bold">
-                                            Total Books Borrowed
-                                        </h5>
-                                        <p class="mb-2 fw-bold">
-                                            <?php echo $total_borrowed; ?>
-                                        </p>
-                                        <div class="mb-0">
-                                            <span class="fw-bold">
-                                                Total books borrowed
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="card border-0">
-                                    <div class="card-body py-4">
-                                        <h5 class="mb-2 fw-bold">
-                                            New Members
-                                        </h5>
-                                        <p class="mb-2 fw-bold">
-                                            <?php echo $members_last_week; ?>
-                                        </p>
-                                        <div class="mb-0">
-                                            <span class="fw-bold">
-                                                In the past week
-                                            </span>
-                                        </div>
-                                    </div>
+                    <h3 class="fw-bold fs-4 mb-3">Librarian Dashboard</h3>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h5>Total Members</h5>
+                                    <p class="fw-bold"><?php echo $total_members; ?></p>
                                 </div>
                             </div>
                         </div>
-                        <h3 class="fw-bold fs-4 my-3">Library Members
-                        </h3>
-                        <div class="row">
-                            <div class="col-12">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr class="highlight">
-                                            <th scope="col">ID</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Email</th>
-                                            <th scope="col">Adress</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        if (count($members) > 0) {
-                                            // Loop through the fetched members
-                                            foreach ($members as $row) {
-                                                echo "<tr>";
-                                                echo "<th scope='row'>" . $row['member_id'] . "</th>"; 
-                                                echo "<td>" . $row['name'] . "</td>";
-                                                echo "<td>" . $row['email'] . "</td>"; 
-                                                echo "<td>" . $row['address'] . "</td>"; 
-                                                echo "</tr>";
-                                            }
-                                        } else {
-                                            echo "<tr><td colspan='4'>No members found</td></tr>";
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="table-responsive mt-4">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">ID</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Author</th>
-                                            <th scope="col">Genre</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($media_items as $media_item): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($media_item['media_id']); ?></td>
-                                            <td><?php echo htmlspecialchars($media_item['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($media_item['author']); ?></td>
-                                            <td><?php echo htmlspecialchars($media_item['genre']); ?></td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                        <div class="col-md-4">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h5>Total Books Borrowed</h5>
+                                    <p class="fw-bold"><?php echo $total_borrowed; ?></p>
+                                </div>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h5>New Members (Last Week)</h5>
+                                    <p class="fw-bold"><?php echo $members_last_week; ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold fs-4">Library Members</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($members)) : ?>
+                                    <?php foreach ($members as $member) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($member['member_id']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['address']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr><td colspan="4">No members found</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="fw-bold fs-4 my-4">Media Items</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Genre</th>
+                                    <th>Branch ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($media_items)) : ?>
+                                    <?php foreach ($media_items as $media) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($media['media_id']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['author']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['genre']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['branch_id']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr><td colspan="5">No media items found</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </main>
-            <footer class="footer">
-                <div class="container-fluid">
-                    <div class="row text-body-secondary">
-                        <div class="col-6 text-start ">
-                            <a class="text-body-secondary" href=" #">
-                                <strong>AML</strong>
-                            </a>
-                        </div>
-                        <div class="col-6 text-end text-body-secondary d-none d-md-block">
-                            <ul class="list-inline mb-0">
-                                <li class="list-inline-item">
-                                    <a class="text-body-secondary" href="#">Contact</a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a class="text-body-secondary" href="#">About Us</a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a class="text-body-secondary" href="#">Terms & Conditions</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
+
+    <!-- Delete Media Modal -->
+    <div class="modal fade" id="deleteMediaModal" tabindex="-1" aria-labelledby="deleteMediaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteMediaModalLabel">Delete Media</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="media_id" class="form-label">Enter Media ID to Delete</label>
+                        <input type="number" class="form-control" id="media_id" name="media_id" placeholder="Media ID" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="delete_media" class="btn btn-danger">Delete</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Media Modal -->
+    <div class="modal fade" id="createMediaModal" tabindex="-1" aria-labelledby="createMediaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createMediaModalLabel">Create Media</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required>
+                        
+                        <label for="author" class="form-label mt-3">Author</label>
+                        <input type="text" class="form-control" id="author" name="author" placeholder="Enter Author" required>
+                        
+                        <label for="genre" class="form-label mt-3">Genre</label>
+                        <input type="text" class="form-control" id="genre" name="genre" placeholder="Enter Genre" required>
+                        
+                        <label for="branch_id" class="form-label mt-3">Branch ID</label>
+                        <input type="number" class="form-control" id="branch_id" name="branch_id" placeholder="Enter Branch ID" value="1" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="create_media" class="btn btn-primary">Create</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
