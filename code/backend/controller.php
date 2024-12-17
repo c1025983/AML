@@ -58,4 +58,10 @@ if ($action === 'catalogue') {
     // Render default homepage view
     require "../views/index.php";
 }
+<<<<<<< bedirhan
+=======
+
+$members = getAllLibraryMembers($pdo);
+require_once 'views/librarian/index.php';
+>>>>>>> main
 ?>
