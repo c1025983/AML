@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\code",
+    "\\code\\backend",
+    "\\code\\views",
+    "\\code\\views\\librarian",
+    "\\code\\views\\login_register",
+    "\\code\\views\\login_register\\assets",
+    "\\images",
+    "\\tests"
+  ],
+  "SelectedNode": "\\code\\views\\librarian\\index.php",
+  "PreviewInSolutionExplorer": false
+}
