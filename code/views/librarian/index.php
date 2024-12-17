@@ -77,7 +77,63 @@ if (isset($_POST['edit_media'])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
+
+// Handle member deletion
+if (isset($_POST['delete_member'])) {
+    $member_id = $_POST['member_id'];
+    $sql_delete = "DELETE FROM librarymember WHERE member_id = :member_id";
+    $stmt = $pdo->prepare($sql_delete);
+    $stmt->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// Handle member creation
+if (isset($_POST['create_member'])) {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $address = $_POST['address'];
+    $password = $_POST['password'];
+
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    $sql_insert = "INSERT INTO librarymember (name, email, address, password) VALUES (:name, :email, :address, :password)";
+    $stmt = $pdo->prepare($sql_insert);
+    $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':address', $address, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
+    $stmt->execute();
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+
+// Handle member update
+if (isset($_POST['edit_member'])) {
+    $member_id = $_POST['member_id'];
+    $name = $_POST['edit_name'];
+    $email = $_POST['edit_email'];
+    $address = $_POST['edit_address'];
+
+    $sql_update = "UPDATE librarymember SET name = :name, email = :email, address = :address WHERE member_id = :member_id";
+    $stmt = $pdo->prepare($sql_update);
+    $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':address', $address, PDO::PARAM_STR);
+    $stmt->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
 ?>
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -88,12 +144,18 @@ if (isset($_POST['edit_media'])) {
     <link rel="stylesheet" href="style.css">
     <style>
         .table-container {
-            max-height: 300px; /* Set a max height for the scrollable area */
-            overflow-y: auto; /* Enable vertical scrolling */
-            border: 1px solid #ddd; /* Optional: add a border around the container */
-            border-radius: 5px; /* Optional: rounded corners */
-            background-color: #f9f9f9; /* Optional: light background for the container */
-            padding: 10px; /* Add some padding */
+            max-height: 300px;
+            /* Set a max height for the scrollable area */
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+            border: 1px solid #ddd;
+            /* Optional: add a border around the container */
+            border-radius: 5px;
+            /* Optional: rounded corners */
+            background-color: #f9f9f9;
+            /* Optional: light background for the container */
+            padding: 10px;
+            /* Add some padding */
         }
 
         .card {
@@ -104,6 +166,7 @@ if (isset($_POST['edit_media'])) {
         }
     </style>
 </head>
+
 <body>
     <div class="wrapper">
         <aside id="sidebar">
@@ -128,6 +191,24 @@ if (isset($_POST['edit_media'])) {
                         <span>Task</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse" data-bs-target="#members" aria-expanded="false" aria-controls="members">
+                        <i class="lni lni-user"></i>
+                        <span>Members</span>
+                    </a>
+                    <ul id="members" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#deleteMemberModal">Delete Member</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#createMemberModal">Create Member</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#editMemberModal">Edit Member</a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#media" aria-expanded="false" aria-controls="media">
@@ -215,7 +296,9 @@ if (isset($_POST['edit_media'])) {
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else : ?>
-                                    <tr><td colspan="4">No members found</td></tr>
+                                    <tr>
+                                        <td colspan="4">No members found</td>
+                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -245,7 +328,9 @@ if (isset($_POST['edit_media'])) {
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else : ?>
-                                    <tr><td colspan="5">No media items found</td></tr>
+                                    <tr>
+                                        <td colspan="5">No media items found</td>
+                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -254,6 +339,92 @@ if (isset($_POST['edit_media'])) {
             </main>
         </div>
     </div>
+
+    <!-- Create Member Modal -->
+    <div class="modal fade" id="createMemberModal" tabindex="-1" aria-labelledby="createMemberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createMemberModalLabel">Create Member</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+
+                        <label for="email" class="form-label mt-3">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+
+                        <label for="password" class="form-label mt-3">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+
+                        <label for="address" class="form-label mt-3">Address</label>
+                        <input type="text" class="form-control" id="address" name="address" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="create_member" class="btn btn-primary">Create</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Member Modal -->
+    <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editMemberModalLabel">Edit Member</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="member_id" class="form-label">Member ID</label>
+                        <input type="number" class="form-control" id="member_id" name="member_id" required>
+
+                        <label for="edit_name" class="form-label mt-3">Name</label>
+                        <input type="text" class="form-control" id="edit_name" name="edit_name" required>
+
+                        <label for="edit_email" class="form-label mt-3">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="edit_email" required>
+
+                        <label for="edit_address" class="form-label mt-3">Address</label>
+                        <input type="text" class="form-control" id="edit_address" name="edit_address" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="edit_member" class="btn btn-success">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Member Modal -->
+    <div class="modal fade" id="deleteMemberModal" tabindex="-1" aria-labelledby="deleteMemberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteMemberModalLabel">Delete Member</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="member_id" class="form-label">Enter Member ID</label>
+                        <input type="number" class="form-control" id="member_id" name="member_id" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="delete_member" class="btn btn-danger">Delete</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Delete Media Modal -->
     <div class="modal fade" id="deleteMediaModal" tabindex="-1" aria-labelledby="deleteMediaModalLabel" aria-hidden="true">
@@ -289,13 +460,13 @@ if (isset($_POST['edit_media'])) {
                     <div class="modal-body">
                         <label for="title" class="form-label">Title</label>
                         <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required>
-                        
+
                         <label for="author" class="form-label mt-3">Author</label>
                         <input type="text" class="form-control" id="author" name="author" placeholder="Enter Author" required>
-                        
+
                         <label for="genre" class="form-label mt-3">Genre</label>
                         <input type="text" class="form-control" id="genre" name="genre" placeholder="Enter Genre" required>
-                        
+
                         <label for="branch_id" class="form-label mt-3">Branch ID</label>
                         <input type="number" class="form-control" id="branch_id" name="branch_id" placeholder="Enter Branch ID" value="1" required>
                     </div>
@@ -345,4 +516,5 @@ if (isset($_POST['edit_media'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
