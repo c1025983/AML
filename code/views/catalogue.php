@@ -12,7 +12,9 @@
     <ul>
         <?php foreach ($catalogueItems as $item): ?>
             <li>
-                <strong><?php echo htmlspecialchars($item['title']); ?></strong> by <?php echo htmlspecialchars($item['author']); ?>
+                <a href="mediaItem.php?id=<?php echo $item['id']; ?>">
+                    <strong><?php echo htmlspecialchars($item['title']); ?></strong> by <?php echo htmlspecialchars($item['author']); ?>
+                </a>
             </li>
         <?php endforeach; ?>
     </ul>

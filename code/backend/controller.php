@@ -30,6 +30,6 @@ if ($action === 'catalogue') {
     require "../views/index.php"; // Default to homepage
 }
 
-$members = getAllLibraryMembers($pdo)
+$members = getAllLibraryMembers($pdo);
 require_once 'views/librarian/index.php';
 ?>
