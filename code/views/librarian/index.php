@@ -26,7 +26,7 @@ $members_last_week = $result_last_week ? $result_last_week->fetch(PDO::FETCH_ASS
 $sql_media_items = "SELECT * FROM mediaitem";
 $media_items = $pdo->query($sql_media_items)->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-// Handle media deletion
+
 if (isset($_POST['delete_media'])) {
     $media_id = $_POST['media_id'];
     $sql_delete = "DELETE FROM mediaitem WHERE media_id = :media_id";
