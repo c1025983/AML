@@ -80,78 +80,79 @@
             </div>
         </div>
 
-        <!-- Books Table -->
-        <table class="table table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Genre</th>
-                    <th>Available Copies</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Database connection
-                $dsn = 'mysql:host=localhost;dbname=aml_database;charset=utf8mb4';
-                $username = 'root';
-                $password = '';
-                try {
-                    $pdo = new PDO($dsn, $username, $password);
-                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        <!-- Books Section -->
+        <div class="row">
+            <?php
+            // Database connection
+            $dsn = 'mysql:host=localhost;dbname=aml_database;charset=utf8mb4';
+            $username = 'root';
+            $password = '';
+            try {
+                $pdo = new PDO($dsn, $username, $password);
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                    // Query preparation
-                    $search = $_GET['search'] ?? '';
-                    $mediaType = $_GET['media_type'] ?? '';
-                    $sort = $_GET['sort'] ?? '';
+                // Query preparation
+                $search = $_GET['search'] ?? '';
+                $mediaType = $_GET['media_type'] ?? '';
+                $sort = $_GET['sort'] ?? '';
 
-                    $query = "SELECT * FROM mediaitem WHERE 1=1";
-                    $params = [];
+                $query = "SELECT * FROM mediaitem WHERE 1=1";
+                $params = [];
 
-                    if (!empty($search)) {
-                        $query .= " AND (title LIKE :search OR author LIKE :search OR genre LIKE :search)";
-                        $params[':search'] = "%$search%";
-                    }
-                    if (!empty($mediaType)) {
-                        $query .= " AND type = :media_type";
-                        $params[':media_type'] = $mediaType;
-                    }
-
-                    if (!empty($sort)) {
-                        $allowedSortFields = ['title', 'author'];
-                        if (in_array($sort, $allowedSortFields)) {
-                            $query .= " ORDER BY $sort";
-                        }
-                    }
-
-                    $stmt = $pdo->prepare($query);
-                    $stmt->execute($params);
-                    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                    if (empty($results)) {
-                        echo '<tr><td colspan="6" class="text-center">No media items found</td></tr>';
-                    } else {
-                        foreach ($results as $index => $row) {
-                            echo "<tr>
-                                <td>" . ($index + 1) . "</td>
-                                <td>" . htmlspecialchars($row['title']) . "</td>
-                                <td>" . htmlspecialchars($row['author']) . "</td>
-                                <td>" . htmlspecialchars($row['genre']) . "</td>
-                                <td>" . htmlspecialchars($row['availability']) . "</td>
-                                <td>
-                                    <a href='details.php?id=" . urlencode($row['media_id']) . "' class='btn btn-info btn-sm'>Details</a>
-                                </td>
-                            </tr>";
-                        }
-                    }
-                } catch (PDOException $e) {
-                    echo "<tr><td colspan='6' class='text-danger text-center'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                if (!empty($search)) {
+                    $query .= " AND (title LIKE :search OR author LIKE :search OR genre LIKE :search)";
+                    $params[':search'] = "%$search%";
                 }
-                ?>
-            </tbody>
-        </table>
+                if (!empty($mediaType)) {
+                    $query .= " AND type = :media_type";
+                    $params[':media_type'] = $mediaType;
+                }
+
+                if (!empty($sort)) {
+                    $allowedSortFields = ['title', 'author'];
+                    if (in_array($sort, $allowedSortFields)) {
+                        $query .= " ORDER BY $sort";
+                    }
+                }
+
+                $stmt = $pdo->prepare($query);
+                $stmt->execute($params);
+                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (empty($results)) {
+                    echo '<p class="text-center">No media items found</p>';
+                } else {
+                    foreach ($results as $row) {
+                        // Determine the correct image based on the media type
+                        if ($row['type'] == 'Book') {
+                            $imagePath = '/AML/images/bookphoto.jpg';
+                        } elseif ($row['type'] == 'DVD') {
+                            $imagePath = '/AML/images/dvdphoto.jpg';
+                        } elseif ($row['type'] == 'Magazine') {
+                            $imagePath = '/AML/images/magazinephoto.jpg';
+                        } else {
+                            $imagePath = '/AML/images/defaultphoto.png'; // Fallback if the type is not recognized
+                        }
+
+                        echo '<div class="col-md-4 mb-4">';
+                        echo '<div class="card h-100">';
+                        echo '<img src="' . $imagePath . '" class="card-img-top" alt="' . htmlspecialchars($row['type']) . ' Photo">';
+                        echo '<div class="card-body">';
+                        echo '<h5 class="card-title">' . htmlspecialchars($row['title']) . '</h5>';
+                        echo '<h6 class="card-subtitle mb-2 text-muted">' . htmlspecialchars($row['author']) . '</h6>';
+                        echo '<p class="card-text">Genre: ' . htmlspecialchars($row['genre']) . '</p>';
+                        echo '<p class="card-text">Available Copies: ' . htmlspecialchars($row['availability']) . '</p>';
+                        echo '<a href="details.php?id=' . urlencode($row['media_id']) . '" class="btn btn-info">Details</a>';
+                        echo '</div>';
+                        echo '</div>';
+                        echo '</div>';
+                    }
+                }
+            } catch (PDOException $e) {
+                echo '<p class="text-danger text-center">Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
+            }
+            ?>
+        </div>
     </div>
 
     <script>
