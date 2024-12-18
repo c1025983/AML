@@ -33,6 +33,8 @@ if ($action === 'catalogue') {
 
 //-------------------------------------------------librarian logic-----------------------------------------------------------
 
+
+
 // Total members count
 function getTotalMembers($pdo) {
     return fetchScalar($pdo, "SELECT COUNT(*) FROM librarymember");
@@ -77,4 +79,22 @@ function editMedia($pdo, $media_id, $title, $author, $genre, $type, $branch_id) 
                                 WHERE media_id = :media_id", 
                                 ['media_id' => $media_id, 'title' => $title, 'author' => $author, 'genre' => $genre, 'type' => $type, 'branch_id' => $branch_id]);
 }
+// Edit member details
+function editMember($pdo, $member_id, $name, $email, $address) {
+    return executeUpdate($pdo, 
+        "UPDATE librarymember 
+         SET name = :name, email = :email, address = :address 
+         WHERE member_id = :member_id", 
+        ['name' => $name, 'email' => $email, 'address' => $address, 'member_id' => $member_id]
+    );
+}
+
+// Delete a member
+function deleteMember($pdo, $member_id) {
+    return executeUpdate($pdo, 
+        "DELETE FROM librarymember WHERE member_id = :member_id", 
+        ['member_id' => $member_id]
+    );
+}
+
 ?>
