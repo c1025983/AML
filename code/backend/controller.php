@@ -33,6 +33,8 @@ if ($action === 'catalogue') {
 
 //-------------------------------------------------librarian logic-----------------------------------------------------------
 
+
+
 // Total members count
 function getTotalMembers($pdo) {
     return fetchScalar($pdo, "SELECT COUNT(*) FROM librarymember");
