@@ -26,14 +26,6 @@ if ($action === 'catalogue') {
     require "../views/join.php";
 } elseif ($action === 'login') {
     require "../views/login.php";
-<<<<<<< Updated upstream
-} else {
-    require "../views/index.php"; // Default to homepage
-}
-
-$members = getAllLibraryMembers($pdo);
-require_once 'views/librarian/index.php';
-=======
 } elseif ($action === 'librarian'){
     require "../views/librarian/index.php";
 }
@@ -85,5 +77,4 @@ function editMedia($pdo, $media_id, $title, $author, $genre, $type, $branch_id) 
                                 WHERE media_id = :media_id", 
                                 ['media_id' => $media_id, 'title' => $title, 'author' => $author, 'genre' => $genre, 'type' => $type, 'branch_id' => $branch_id]);
 }
->>>>>>> Stashed changes
 ?>

@@ -29,16 +29,6 @@ function loginUser($pdo, $email, $password)
     return false; // Login failed
 }
 
-<<<<<<< Updated upstream
-function getAllLibraryMembers($pdo) {
-    // Query to get all members from the librarymember table
-    $stmt = $pdo->query("SELECT * FROM librarymember");
-    
-    // Return the fetched results as an associative array
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-=======
 
 //-----------------------------librarian---------------------
 
@@ -68,5 +58,4 @@ function fetchScalar($pdo, $sql, $params = []) {
 function executeUpdate($pdo, $sql, $params = []) {
     return executeQuery($pdo, $sql, $params);
 }
->>>>>>> Stashed changes
 ?>
