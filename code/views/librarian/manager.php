@@ -34,7 +34,7 @@ if (isset($_POST['edit_media'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Librarian Page</title>
+    <title>Branch Manager Page</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         crossorigin="anonymous">
@@ -121,7 +121,7 @@ if (isset($_POST['edit_media'])) {
             </nav>
             <main class="content px-3 py-4">
                 <div class="container-fluid">
-                    <h3 class="fw-bold fs-4 mb-3">Librarian Dashboard</h3>
+                    <h3 class="fw-bold fs-4 mb-3">Branch Manager Dashboard</h3>
                     <div class="row mb-4">
                         <div class="col-md-4">
                             <div class="card">
