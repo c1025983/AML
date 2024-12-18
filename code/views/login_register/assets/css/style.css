@@ -1,0 +1,209 @@
+/* Sayfaya özel stil */
+.page-specific {
+    font-family: 'Poppins', sans-serif;
+}
+
+    .page-specific ::after,
+    .page-specific ::before {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .page-specific a {
+        text-decoration: none;
+    }
+
+    .page-specific li {
+        list-style: none;
+    }
+
+    .page-specific .wrapper {
+        display: flex;
+    }
+
+    .page-specific .main {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        transition: all 0.35s ease-in-out;
+        background-color: #fff;
+        min-width: 0;
+    }
+
+    .page-specific #sidebar {
+        width: 70px;
+        min-width: 70px;
+        z-index: 1000;
+        transition: all .25s ease-in-out;
+        background-color: #0e2238;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .page-specific #sidebar.expand {
+            width: 260px;
+            min-width: 260px;
+        }
+
+    .page-specific .toggle-btn {
+        background-color: transparent;
+        cursor: pointer;
+        border: 0;
+        padding: 1rem 1.5rem;
+    }
+
+        .page-specific .toggle-btn i {
+            font-size: 1.5rem;
+            color: #FFF;
+        }
+
+    .page-specific .sidebar-logo {
+        margin: auto 0;
+    }
+
+        .page-specific .sidebar-logo a {
+            color: #FFF;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+    .page-specific #sidebar:not(.expand) .sidebar-logo,
+    .page-specific #sidebar:not(.expand) a.sidebar-link span {
+        display: none;
+    }
+
+    .page-specific #sidebar.expand .sidebar-logo,
+    .page-specific #sidebar.expand a.sidebar-link span {
+        animation: fadeIn .25s ease;
+    }
+
+    .page-specific @keyframes fadeIn {
+        0%
+
+{
+    opacity: 0;
+}
+
+100% {
+    opacity: 1;
+}
+
+}
+
+.page-specific .sidebar-nav {
+    padding: 2rem 0;
+    flex: 1 1 auto;
+}
+
+.page-specific a.sidebar-link {
+    padding: .625rem 1.625rem;
+    color: #FFF;
+    display: block;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    border-left: 3px solid transparent;
+}
+
+.page-specific .sidebar-link i,
+.page-specific .dropdown-item i {
+    font-size: 1.1rem;
+    margin-right: .75rem;
+}
+
+.page-specific a.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, .075);
+    border-left: 3px solid #3b7ddd;
+}
+
+.page-specific .sidebar-item {
+    position: relative;
+}
+
+.page-specific #sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
+    position: absolute;
+    top: 0;
+    left: 70px;
+    background-color: #0e2238;
+    padding: 0;
+    min-width: 15rem;
+    display: none;
+}
+
+.page-specific #sidebar:not(.expand) .sidebar-item:hover .has-dropdown + .sidebar-dropdown {
+    display: block;
+    max-height: 15em;
+    width: 100%;
+    opacity: 1;
+}
+
+.page-specific #sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
+    border: solid;
+    border-width: 0 .075rem .075rem 0;
+    content: "";
+    display: inline-block;
+    padding: 2px;
+    position: absolute;
+    right: 1.5rem;
+    top: 1.4rem;
+    transform: rotate(-135deg);
+    transition: all .2s ease-out;
+}
+
+.page-specific #sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
+    transform: rotate(45deg);
+    transition: all .2s ease-out;
+}
+
+.page-specific .navbar {
+    background-color: #f5f5f5;
+    box-shadow: 0 0 2rem 0 rgba(33, 37, 41, .1);
+}
+
+.page-specific .navbar-expand .navbar-collapse {
+    min-width: 200px;
+}
+
+.page-specific .avatar {
+    height: 40px;
+    width: 40px;
+}
+
+.page-specific .card {
+    background-color: #f5f5f5;
+    transition: .4s;
+    cursor: pointer;
+    color: #000;
+    margin-bottom: 1rem;
+}
+
+    .page-specific .card:hover {
+        background-color: #293b5f;
+        color: #FFF;
+        transform: translate(-10.5px);
+    }
+
+.page-specific .text-success {
+    background-color: #71c664;
+    padding: 0.25 0.35rem;
+    font-size: 0.715;
+    color: #FFF;
+    border-radius: 5px;
+}
+
+.page-specific footer {
+    background-color: #f5f5f5;
+    padding: 1rem .875rem;
+}
+
+.page-specific @media (min-width: 768px) {
+    .navbar-group-navbar .form-control:focus
+
+{
+    outline: none;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255);
+    border: none;
+}
+}
