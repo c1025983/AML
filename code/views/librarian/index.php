@@ -29,6 +29,18 @@ if (isset($_POST['edit_media'])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
+if (isset($_POST['edit_member'])) {
+    editMember($pdo, $_POST['member_id'], $_POST['edit_name'], $_POST['edit_email'], $_POST['edit_address']);
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+if (isset($_POST['delete_member'])) {
+    deleteMember($pdo, $_POST['member_id']);
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
 ?>
 <head>
     <meta charset="UTF-8">
