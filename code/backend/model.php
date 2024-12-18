@@ -29,6 +29,7 @@ function loginUser($pdo, $email, $password)
     return false; // Login failed
 }
 
+<<<<<<< Updated upstream
 function getAllLibraryMembers($pdo) {
     // Query to get all members from the librarymember table
     $stmt = $pdo->query("SELECT * FROM librarymember");
@@ -37,4 +38,35 @@ function getAllLibraryMembers($pdo) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+=======
+
+//-----------------------------librarian---------------------
+
+// Generic function to execute queries
+function executeQuery($pdo, $sql, $params = []) {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt;
+}
+
+// Fetch all rows
+function fetchAll($pdo, $sql, $params = []) {
+    return executeQuery($pdo, $sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Fetch one row
+function fetchOne($pdo, $sql, $params = []) {
+    return executeQuery($pdo, $sql, $params)->fetch(PDO::FETCH_ASSOC);
+}
+
+// Fetch scalar value (e.g., counts)
+function fetchScalar($pdo, $sql, $params = []) {
+    return executeQuery($pdo, $sql, $params)->fetchColumn();
+}
+
+// Insert, Update, Delete operation
+function executeUpdate($pdo, $sql, $params = []) {
+    return executeQuery($pdo, $sql, $params);
+}
+>>>>>>> Stashed changes
 ?>
