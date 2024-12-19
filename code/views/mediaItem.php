@@ -1,60 +1,67 @@
 <?php
-require_once "config.php";
-session_start();
+require_once 'config.php';
 
-//checks if the user has logged in already to determine whether the borrow button will be added
-if (!isset($_SESSION['user'])) {
-    die("You must be logged in to borrow media.");
-}
+// Initialize variables
+$message = '';
+$dueDate = '';
 
-//error message for if the media ID isn't found
-if (!isset($_GET['id'])) {
-    die("Media ID not specified.");
-}
+if (isset($_GET['id'])) {
+    $mediaId = $_GET['id'];
 
-$mediaId = $_GET['id'];
-$loggedInUserId = $_SESSION['user']['id']; //values to pass to query the user details
+    // Fetch the media item details
+    $query = "SELECT * FROM mediaitem WHERE media_id = :media_id";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([':media_id' => $mediaId]);
 
-try {
-    //The below code will get the details from the media table to add into the page
-    $stmt = $pdo->prepare("SELECT * FROM mediaItem WHERE id = :id");
-    $stmt->bindParam(':id', $mediaId, PDO::PARAM_INT);
-    $stmt->execute();
     $mediaItem = $stmt->fetch();
-
-    if (!$mediaItem) {
-        die("Media item not found."); //Error message if fetching the media doesn't work for some reason
+    if ($mediaItem) {
+        $title = htmlspecialchars($mediaItem['title']);
+        $author = htmlspecialchars($mediaItem['author']);
+        $genre = htmlspecialchars($mediaItem['genre']);
+        $availability = htmlspecialchars($mediaItem['availability']);
+        $type = htmlspecialchars($mediaItem['type']);
+    } else {
+        die("Media item not found.");
     }
+} else {
+    die("Invalid media ID.");
+}
 
-    //Button functionality. Email functionality removed for now since it wasnt working.
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['borrow'])) {
-        if ($mediaItem['availability'] == 1) {
-            //insert into returnrecord after the borrow button is clicked, currently doesn't check for duplicates.
-            $returndate = (new DateTime('+1 month'))->format('Y-m-d'); //I've made the due date 1 month away, will adjust if needed
-            $stmt = $pdo->prepare("INSERT INTO returnrecord (memberID, mediaID, returndate, returncondition) VALUES (:memberID, :mediaID, :returndate, 'NotReturned')");
-            $stmt->bindParam(':memberID', $loggedInUserId, PDO::PARAM_INT);
-            $stmt->bindParam(':mediaID', $mediaId, PDO::PARAM_INT);
-            $stmt->bindParam(':returndate', $returndate);
-            $stmt->execute();
+// Handle the borrow button
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['borrow'])) {
+    $memberId = 1; // Use the fixed library member ID
+    $borrowDate = date('Y-m-d');
+    $dueDate = date('Y-m-d', strtotime('+14 days')); // 14-day borrowing period
 
-            //Updates the media table immediately so to reflect that its not available anymore.
-            $stmt = $pdo->prepare("UPDATE mediaItem SET availability = 0 WHERE id = :id");
-            $stmt->bindParam(':id', $mediaId, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            //This is a temporary message until the emailing works, will be replaced if time allows.
-            echo "<script>alert('Media has been borrowed successfully. Return date is one month from now.');</script>";
-            //Updates the availability text
-            header("Location: mediaItem.php?id=$mediaId");
-            exit;
-        } else {
-            //do nothing if the media is unavailable anyways. This branch ideally should not happen since the borrow button
-            //usually won't be visible if this is the case
-            echo "<script>alert('Media is unavailable.');</script>";
-        }
+    try {
+        $pdo->beginTransaction();
+
+        // Insert into borrowrecord table
+        $borrowQuery = "INSERT INTO borrowrecord (borrow_date, return_due, status, member_id, media_id) 
+                        VALUES (:borrow_date, :return_due, 'borrowed', :member_id, :media_id)";
+        $stmt = $pdo->prepare($borrowQuery);
+        $stmt->execute([
+            ':borrow_date' => $borrowDate,
+            ':return_due' => $dueDate,
+            ':member_id' => $memberId,
+            ':media_id' => $mediaId,
+        ]);
+
+        // Update the availability in the mediaitem table
+        $updateQuery = "UPDATE mediaitem SET availability = 0 WHERE media_id = :media_id";
+        $stmt = $pdo->prepare($updateQuery);
+        $stmt->execute([':media_id' => $mediaId]);
+
+        $pdo->commit();
+
+        $message = "Media borrowed successfully, due for: $dueDate";
+
+        // Update the availability status in the UI
+        $availability = 0;
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        $message = "Error: " . $e->getMessage();
     }
-} catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
 }
 ?>
 
@@ -63,21 +70,44 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($mediaItem['title']); ?></title>
-    <link rel="stylesheet" href="../public/style.css">
+    <title>Media Item</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script>
+        // Display the success message as an alert
+        document.addEventListener("DOMContentLoaded", function () {
+            const message = "<?php echo addslashes($message); ?>";
+            if (message) {
+                alert(message);
+            }
+        });
+    </script>
 </head>
 <body>
-    <h1><?php echo htmlspecialchars($mediaItem['title']); ?></h1>
-    <p><strong>Author:</strong> <?php echo htmlspecialchars($mediaItem['author']); ?></p>
-    <p><strong>Genre:</strong> <?php echo htmlspecialchars($mediaItem['genre']); ?></p>
-    <p><strong>Availability:</strong> <?php echo $mediaItem['availability'] ? "Available" : "Unavailable"; ?></p>
-    <?php if ($mediaItem['availability']): ?>
-        <form method="POST">
-            <button type="submit" name="borrow">Borrow</button>
-        </form>
-    <?php else: ?>
-        <p>This media item is currently unavailable.</p> 
-    <?php endif; ?>
-    <a href="catalogue.php">Back to Catalogue</a>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <!-- Display the media image -->
+                <img src="/AML/images/<?php echo strtolower($type); ?>photo.jpg" class="img-fluid" alt="<?php echo $type; ?> Image">
+            </div>
+            <div class="col-md-6">
+                <!-- Display media item details -->
+                <h1><?php echo $title; ?></h1>
+                <p><strong>Author:</strong> <?php echo $author; ?></p>
+                <p><strong>Genre:</strong> <?php echo $genre; ?></p>
+                <p><strong>Type:</strong> <?php echo $type; ?></p>
+                <p><strong>Availability:</strong> <span id="availability"><?php echo $availability == 1 ? 'Available' : 'Not Available'; ?></span></p>
+
+                <!-- Borrow button -->
+                <?php if ($availability == 1): ?>
+                    <form method="POST">
+                        <button type="submit" name="borrow" class="btn btn-primary">Borrow</button>
+                    </form>
+                <?php else: ?>
+                    <button class="btn btn-secondary" disabled>Not Available</button>
+                <?php endif; ?>
+            </div>
+        </div>
+        <a href="catalogue.php" class="btn btn-secondary mt-3">Back to Catalog</a>
+    </div>
 </body>
 </html>
