@@ -1,0 +1,64 @@
+ADR’s
+
+ADR 1: Selection of Three-Tier Architecture
+•	Date: Week of 30/09/2024
+•	Decision: Adopt a three-tier architecture for the AML Management System.
+•	Context: The system requires modularity and scalability to handle an expanding user base and ensure maintainability.
+•	Options Considered:
+o	Monolithic architecture: Simple but lacks scalability.
+o	Three-tier architecture: Supports separation of concerns, scalability, and modularity.
+•	Decision Outcome: The three-tier architecture was chosen to separate the presentation, application, and data layers, improving maintainability and supporting future scalability.
+•	Status: Accepted.
+________________________________________
+ADR 2: Use of MVC Design Pattern
+•	Date: Week of 30/09/2024
+•	Decision: Implement the system using the Model-View-Controller (MVC) pattern.
+•	Context: The system requires a clear separation of concerns to simplify development and enable efficient debugging.
+•	Options Considered:
+o	MVC: Provides structure and clear separation of logic.
+o	Procedural programming: Simpler but less scalable for larger systems.
+•	Decision Outcome: MVC was selected due to its ability to support modular development and align with the three-tier architecture.
+•	Status: Accepted.
+________________________________________
+ADR 3: Use of PHP for Backend Development
+•	Date: Week of 30/09/2024
+•	Decision: Use PHP for backend development.
+•	Context: The team is familiar with PHP, and it integrates well with the chosen MVC framework and database technologies.
+•	Options Considered:
+o	PHP: Familiarity among team members, suitable for web applications.
+o	Python: Powerful but less familiarity within the team.
+o	Java: Robust but requires additional time for setup and learning.
+•	Decision Outcome: PHP was chosen for its ease of use and compatibility with the project requirements.
+•	Status: Accepted.
+________________________________________
+ADR 4: C4 Model for Architecture Visualization
+•	Date: Week of 07/10/2024
+•	Decision: Use C4 models for architecture visualization.
+•	Context: The project requires clear documentation of system architecture for stakeholder communication and team alignment.
+•	Options Considered:
+o	C4 model: Provides layered views of system architecture.
+o	UML diagrams: Detailed but may not offer the same high-level clarity.
+•	Decision Outcome: C4 models (Level 1 and 2) were selected to clearly represent the system’s structure and interactions.
+•	Status: Accepted.
+________________________________________
+ADR 5: Use of Sequence and Use Case Diagrams
+•	Date: Week of 14/10/2024
+•	Decision: Create sequence and use case diagrams to detail system workflows and interactions.
+•	Context: Detailed visual documentation is required for both developers and stakeholders to ensure clarity in workflows and functionality.
+•	Options Considered:
+o	Sequence and use case diagrams: Provide clear documentation of workflows.
+o	Informal sketches: Quick to create but lack clarity and precision.
+•	Decision Outcome: Sequence and use case diagrams were chosen for their ability to clearly depict user interactions and system behavior.
+•	Status: Accepted.
+________________________________________
+ADR 6: Selection of MySQL for Database Management
+•	Date: Week of 11/11/2024
+•	Decision: Use MySQL as the database management system.
+•	Context: The system requires a reliable and scalable database to store and manage library data.
+•	Options Considered:
+o	MySQL: Open-source, well-supported, and suitable for relational data.
+o	PostgreSQL: Robust but adds complexity for the team’s current skillset.
+o	MongoDB: Better for non-relational data but not suitable for this project.
+•	Decision Outcome: MySQL was chosen due to team familiarity and its alignment with project needs.
+•	Status: Accepted.
+
