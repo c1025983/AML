@@ -29,6 +29,12 @@ if (isset($_POST['edit_media'])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
+
+if (isset($_POST['order_media'])) {
+    createPurchaseOrder($pdo, $_POST['media_id'], $_POST['vendor_id'], $_POST['quantity'], $_POST['delivery_date']);
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect back to the same page
+    exit;
+}
 ?>
 
 <head>
@@ -385,6 +391,7 @@ if (isset($_POST['edit_media'])) {
         </div>
     </div>
 
+<<<<<<< Updated upstream
     <!-- Order Media Modal -->
     <div class="modal fade" id="orderMediaModal" tabindex="-1" aria-labelledby="orderMediaModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -415,6 +422,39 @@ if (isset($_POST['edit_media'])) {
             </div>
         </div>
     </div>
+=======
+    <!-- Order Modal -->
+    <div class="modal fade" id="orderMediaModal" tabindex="-1" aria-labelledby="orderMediaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderMediaModalLabel">Order Media</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="media_id" class="form-label">Media ID</label>
+                    <input type="number" class="form-control" id="media_id" name="media_id" placeholder="Enter Media ID" required>
+
+                    <label for="vendor_id" class="form-label mt-3">Vendor ID</label>
+                    <input type="number" class="form-control" id="vendor_id" name="vendor_id" placeholder="Enter Vendor ID" required>
+
+                    <label for="quantity" class="form-label mt-3">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter Quantity" required>
+
+                    <label for="delivery_date" class="form-label mt-3">Delivery Date</label>
+                    <input type="date" class="form-control" id="delivery_date" name="delivery_date" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="order_media" class="btn btn-primary">Order</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+>>>>>>> Stashed changes
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">

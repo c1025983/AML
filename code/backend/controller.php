@@ -97,4 +97,12 @@ function deleteMember($pdo, $member_id) {
     );
 }
 
+// Handle "Order Media" POST request
+if ($action === 'order_media' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    createPurchaseOrder($pdo, $_POST['media_id'], $_POST['vendor_id'], $_POST['quantity'], $_POST['delivery_date']);
+    header("Location: ../public/index.php?action=librarian"); // Redirect after saving
+    exit;
+}
+
+
 ?>

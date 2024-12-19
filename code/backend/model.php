@@ -58,4 +58,19 @@ function fetchScalar($pdo, $sql, $params = []) {
 function executeUpdate($pdo, $sql, $params = []) {
     return executeQuery($pdo, $sql, $params);
 }
+
+// Add a new purchase order
+function createPurchaseOrder($pdo, $media_id, $vendor_id, $quantity, $delivery_date) {
+    return executeUpdate($pdo, 
+        "INSERT INTO purchaseorder (media_id, vendor_id, quantity, delivery_date) 
+         VALUES (:media_id, :vendor_id, :quantity, :delivery_date)", 
+        [
+            'media_id' => $media_id, 
+            'vendor_id' => $vendor_id, 
+            'quantity' => $quantity, 
+            'delivery_date' => $delivery_date
+        ]
+    );
+}
+
 ?>
