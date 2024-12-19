@@ -29,24 +29,12 @@ if (isset($_POST['edit_media'])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
-if (isset($_POST['edit_member'])) {
-    editMember($pdo, $_POST['member_id'], $_POST['edit_name'], $_POST['edit_email'], $_POST['edit_address']);
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
-if (isset($_POST['delete_member'])) {
-    deleteMember($pdo, $_POST['member_id']);
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
 ?>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Librarian Page</title>
+    <title>Branch Manager Page</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         crossorigin="anonymous">
@@ -133,7 +121,7 @@ if (isset($_POST['delete_member'])) {
             </nav>
             <main class="content px-3 py-4">
                 <div class="container-fluid">
-                    <h3 class="fw-bold fs-4 mb-3">Librarian Dashboard</h3>
+                    <h3 class="fw-bold fs-4 mb-3">Branch Manager Dashboard</h3>
                     <div class="row mb-4">
                         <div class="col-md-4">
                             <div class="card">
@@ -312,39 +300,40 @@ if (isset($_POST['delete_member'])) {
     </div>
 
     <!-- Create Media Modal -->
-<div class="modal fade" id="createMediaModal" tabindex="-1" aria-labelledby="createMediaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createMediaModalLabel">Create Media</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <label for="title" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required>
+    <div class="modal fade" id="createMediaModal" tabindex="-1" aria-labelledby="createMediaModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createMediaModalLabel">Create Media</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title"
+                            required>
 
-                    <label for="author" class="form-label mt-3">Author</label>
-                    <input type="text" class="form-control" id="author" name="author" placeholder="Enter Author" required>
+                        <label for="author" class="form-label mt-3">Author</label>
+                        <input type="text" class="form-control" id="author" name="author" placeholder="Enter Author"
+                            required>
 
-                    <label for="genre" class="form-label mt-3">Genre</label>
-                    <input type="text" class="form-control" id="genre" name="genre" placeholder="Enter Genre" required>
+                        <label for="genre" class="form-label mt-3">Genre</label>
+                        <input type="text" class="form-control" id="genre" name="genre" placeholder="Enter Genre"
+                            required>
 
-                    <label for="type" class="form-label mt-3">Type</label>
-                    <input type="text" class="form-control" id="type" name="type" placeholder="Enter Media Type" required>
-
-                    <label for="branch_id" class="form-label mt-3">Branch ID</label>
-                    <input type="number" class="form-control" id="branch_id" name="branch_id" placeholder="Enter Branch ID" required>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" name="create_media" class="btn btn-primary">Create</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+                        <label for="branch_id" class="form-label mt-3">Branch ID</label>
+                        <input type="number" class="form-control" id="branch_id" name="branch_id"
+                            placeholder="Enter Branch ID" value="1" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="create_media" class="btn btn-primary">Create</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-
 
     <!-- Edit Media Modal -->
     <div class="modal fade" id="editMediaModal" tabindex="-1" aria-labelledby="editMediaModalLabel" aria-hidden="true">
