@@ -23,15 +23,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Task</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Auth
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#">Login</a></li>
-                            <li><a class="dropdown-item" href="#">Register</a></li>
-                        </ul>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Notifications</a>
                     </li>
@@ -49,14 +40,14 @@
         <!-- Search and Filter Section -->
         <div class="row mb-4">
             <div class="col-md-6">
-                <form class="d-flex" method="GET" action="catalogue.php">
+                <form class="d-flex" method="GET" action="index.php">
                     <input id="search" type="text" class="form-control me-2" name="search" placeholder="Search by title, author, or genre" value="<?php echo htmlspecialchars($_GET['search'] ?? '', ENT_QUOTES); ?>">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </form>
                 <div id="autocomplete-results" class="list-group mt-1 position-absolute w-50"></div>
             </div>
             <div class="col-md-6">
-                <form method="GET" action="catalogue.php">
+                <form method="GET" action="index.php">
                     <select class="form-select" name="media_type" onchange="this.form.submit()">
                         <option value="">All Media Types</option>
                         <option value="Book" <?php echo (($_GET['media_type'] ?? '') === 'Book') ? 'selected' : ''; ?>>Book</option>
@@ -70,7 +61,7 @@
         <!-- Sort Section -->
         <div class="row mb-3">
             <div class="col-md-12">
-                <form method="GET" action="catalogue.php" class="d-flex justify-content-end">
+                <form method="GET" action="index.php" class="d-flex justify-content-end">
                     <select class="form-select w-auto" name="sort" onchange="this.form.submit()">
                         <option value="">Sort by</option>
                         <option value="title" <?php echo (($_GET['sort'] ?? '') === 'title') ? 'selected' : ''; ?>>Title</option>
@@ -142,7 +133,7 @@
                         echo '<h6 class="card-subtitle mb-2 text-muted">' . htmlspecialchars($row['author']) . '</h6>';
                         echo '<p class="card-text">Genre: ' . htmlspecialchars($row['genre']) . '</p>';
                         echo '<p class="card-text">Available Copies: ' . htmlspecialchars($row['availability']) . '</p>';
-                        echo '<a href="mediaItem.php?id=' . urlencode($row['media_id']) . '" class="btn btn-info">Details</a>';
+                        echo '<a href="details.php?id=' . urlencode($row['media_id']) . '" class="btn btn-info">Details</a>';
                         echo '</div>';
                         echo '</div>';
                         echo '</div>';
