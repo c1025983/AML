@@ -1,53 +1,49 @@
 ﻿<?php
-// Veritabanı bağlantısı
+session_start();
+
+// Database connection code
 $servername = "localhost";
-$username = "root"; // XAMPP varsayılan kullanıcı adı
-$password = ""; // XAMPP varsayılan şifre
-$dbname = "aml_database"; // Veritabanı adı
+$username = "root";
+$password = "";
+$dbname = "aml_database";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Bağlantı kontrolü
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Hata mesajlarını tutacak bir değişken oluştur
 $error_message = "";
 
-// Form verileri alındığında işleme
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $conn->real_escape_string($_POST["email"]);
     $password = $_POST["password"];
 
-    // Librarian tablosunda kullanıcıyı ara
     $sql = "SELECT * FROM librarian WHERE email = '$email'";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
-        // Librarian bulunursa
         $row = $result->fetch_assoc();
-        // account_activation_hash kontrolü kaldırıldı
         if (password_verify($password, $row['password'])) {
-            // Şifre doğruysa, librarian sayfasına yönlendir
             header("Location: /AML/code/views/librarian/index.php");
             exit();
         } else {
             $error_message = "<p style='color:red; text-align:center;'>Wrong Password!</p>";
         }
     } else {
-        // Librarian bulunamazsa, member tablosunda ara
         $sql = "SELECT * FROM librarymember WHERE email = '$email'";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
-            // Member bulunduysa
             $row = $result->fetch_assoc();
             if ($row['account_activation_hash'] != 0) {
                 $error_message = "<p style='color:red; text-align:center;'>Account not verified. Please check your email for verification instructions.</p>";
             } elseif (password_verify($password, $row['password'])) {
-                // Şifre doğruysa, member dashboard sayfasına yönlendir
-                header("Location: ../index.php");
+                // Store member ID in the session
+                $_SESSION['member_id'] = $row['id'];
+
+                // Redirect to the member dashboard
+                header("Location: ../catalogue.php");
                 exit();
             } else {
                 $error_message = "<p style='color:red; text-align:center;'>Wrong Password!</p>";
@@ -57,7 +53,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-
 
 $conn->close();
 ?>
@@ -71,9 +66,29 @@ $conn->close();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <header class="bg-primary text-white text-center py-3">
-        <h1>Advanced Management Library</h1>
-    </header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #293b5f;">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="#">AML</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" aria-current="page" href="..\index.php">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="about.php">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="contact.php">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
 
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -94,7 +109,7 @@ $conn->close();
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                             </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Sign In</button>
+                                <button type="submit" class="btn" style="background-color: #293b5f; color: white;">Sign In</button>
                             </div>
                         </form>
 
