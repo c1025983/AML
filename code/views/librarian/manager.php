@@ -30,11 +30,12 @@ if (isset($_POST['edit_media'])) {
     exit;
 }
 ?>
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Branch Manager Page</title>
+    <title>Purchase Manager Page</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         crossorigin="anonymous">
@@ -53,6 +54,12 @@ if (isset($_POST['edit_media'])) {
                 </div>
             </div>
             <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#orderMediaModal">
+                        <i class="lni lni-cart"></i>
+                        <span>Order Media</span>
+                    </a>
+                </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#members" aria-expanded="false" aria-controls="members">
@@ -121,7 +128,7 @@ if (isset($_POST['edit_media'])) {
             </nav>
             <main class="content px-3 py-4">
                 <div class="container-fluid">
-                    <h3 class="fw-bold fs-4 mb-3">Branch Manager Dashboard</h3>
+                    <h3 class="fw-bold fs-4 mb-3">Purchase Manager Dashboard</h3>
                     <div class="row mb-4">
                         <div class="col-md-4">
                             <div class="card">
@@ -158,18 +165,18 @@ if (isset($_POST['edit_media'])) {
                             </thead>
                             <tbody>
                                 <?php if (!empty($members)) : ?>
-                                <?php foreach ($members as $member) : ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($member['member_id']); ?></td>
-                                    <td><?php echo htmlspecialchars($member['name']); ?></td>
-                                    <td><?php echo htmlspecialchars($member['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($member['address']); ?></td>
-                                </tr>
-                                <?php endforeach; ?>
+                                    <?php foreach ($members as $member) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($member['member_id']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($member['address']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
                                 <?php else : ?>
-                                <tr>
-                                    <td colspan="4">No members found</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="4">No members found</td>
+                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -194,20 +201,20 @@ if (isset($_POST['edit_media'])) {
                             </thead>
                             <tbody>
                                 <?php if (!empty($media_items)) : ?>
-                                <?php foreach ($media_items as $media) : ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($media['media_id']); ?></td>
-                                    <td><?php echo htmlspecialchars($media['title']); ?></td>
-                                    <td><?php echo htmlspecialchars($media['author']); ?></td>
-                                    <td><?php echo htmlspecialchars($media['genre']); ?></td>
-                                    <td><?php echo htmlspecialchars($media['type']); ?></td>
-                                    <td><?php echo htmlspecialchars($media['branch_id']); ?></td>
-                                </tr>
-                                <?php endforeach; ?>
+                                    <?php foreach ($media_items as $media) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($media['media_id']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['author']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['genre']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['type']); ?></td>
+                                            <td><?php echo htmlspecialchars($media['branch_id']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
                                 <?php else : ?>
-                                <tr>
-                                    <td colspan="5">No media items found</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="5">No media items found</td>
+                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -371,6 +378,37 @@ if (isset($_POST['edit_media'])) {
                     </div>
                     <div class="modal-footer">
                         <button type="submit" name="edit_media" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Media Modal -->
+    <div class="modal fade" id="orderMediaModal" tabindex="-1" aria-labelledby="orderMediaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderMediaModalLabel">Order Media</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="media_id" class="form-label">Media ID</label>
+                        <input type="number" class="form-control" id="media_id" name="media_id" placeholder="Enter Media ID" required>
+
+                        <label for="vendor_id" class="form-label mt-3">Vendor ID</label>
+                        <input type="number" class="form-control" id="vendor_id" name="vendor_id" placeholder="Enter Vendor ID" required>
+
+                        <label for="quantity" class="form-label mt-3">Quantity</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter Quantity" required>
+
+                        <label for="delivery_date" class="form-label mt-3">Delivery Date</label>
+                        <input type="date" class="form-control" id="delivery_date" name="delivery_date" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="submitOrder">Order</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
